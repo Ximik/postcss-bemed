@@ -1,0 +1,31 @@
+{
+  "name": "postcss-bemed",
+  "version": "0.0.1",
+  "description": "PostCSS plugin for BEM class names",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ximik/postcss-bemed.git"
+  },
+  "keywords": [
+    "postcss",
+    "css",
+    "postcss-plugin",
+    "bem"
+  ],
+  "author": "Alex Tsokurov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Ximik/postcss-bemed/issues"
+  },
+  "homepage": "https://github.com/Ximik/postcss-bemed#readme",
+  "devDependencies": {
+    "tap": "^9.0.3"
+  },
+  "dependencies": {
+    "postcss": "^5.2.11"
+  }
+}
