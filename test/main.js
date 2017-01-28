@@ -1,8 +1,8 @@
 "use strict"
 
-const test = require('./common');
+const assert = require('./common');
 
-test('base structure', `
+assert('base structure', `
 @block block {
   param: block;
   @element element {
@@ -30,7 +30,7 @@ test('base structure', `
 }
 `);
 
-test('real life example', `
+assert('real life example', `
 @block Message {
   padding: 20px;
   @modifier size {
