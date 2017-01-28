@@ -1,9 +1,19 @@
 "use strict"
 
-const postcss = require('postcss');
+const postcss = require('postcss'),
+      bemed = require('bemed');
 
 const pluginName = 'postcss-bemed';
 module.exports = postcss.plugin(pluginName, (opts) => {
+  opts = opts || {};
+  const rules = Object.assign({
+    block: 'block',
+    element: 'element',
+    modifier: 'modifier',
+    value: 'value'
+  }, opts.rules || {});
+  const helpers = bemed({ separators: opts.separators || {} }).helpers;
+
   const getParam = (path) => {
     if (!path.params) {
       throw path.error('Missing param', { plugin: pluginName });
@@ -15,20 +25,21 @@ module.exports = postcss.plugin(pluginName, (opts) => {
     return params[0];
   };
 
+  const clone = (path, className) => {
+    return postcss.rule({
+      selector: '.' + className,
+      source: path.source
+    });
+  };
+
   const processIfModifier = (root, path, be) => {
-    if (path.type === 'atrule' && path.name === 'modifier') {
+    if (path.type === 'atrule' && path.name === rules.modifier) {
       const m = getParam(path);
-      const modifier = postcss.rule({
-        selector: '.' + be + '--' + m,
-        source: path.source
-      });
+      const modifier = clone(path, helpers.bem(be, m));
       path.each((path) => {
-        if (path.type === 'atrule' && path.name === 'value') {
+        if (path.type === 'atrule' && path.name === rules.value) {
           const v = getParam(path);
-          const value = postcss.rule({
-            selector: '.' + be + '--' + m + '-' + v,
-            source: path.source
-          });
+          const value = clone(path, helpers.bemv(be, m, v));
           path.each((path) => path.moveTo(value));
           value.moveTo(root);
           return;
@@ -42,22 +53,16 @@ module.exports = postcss.plugin(pluginName, (opts) => {
   }
 
   return (root) => {
-    root.walkAtRules('block', (path) => {
+    root.walkAtRules(rules.block, (path) => {
       const b = getParam(path);
       const root = path.parent;
-      const block = postcss.rule({
-        selector: '.' + b,
-        source: path.source
-      });
+      const block = clone(path, b);
       path.each((path) => {
         if (processIfModifier(root, path, b)) return;
-        if (path.type === 'atrule' && path.name === 'element') {
+        if (path.type === 'atrule' && path.name === rules.element) {
           const e = getParam(path);
-          const be = b + '__' + e;
-          const element = postcss.rule({
-            selector: '.' + be,
-            source: path.source
-          });
+          const be = helpers.be(b, e);
+          const element = clone(path, be);
           path.each((path) => {
             if (processIfModifier(root, path, be)) return;
             path.moveTo(element);

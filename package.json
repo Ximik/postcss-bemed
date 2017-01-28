@@ -26,6 +26,7 @@
     "tap": "^9.0.3"
   },
   "dependencies": {
-    "postcss": "^5.2.11"
+    "postcss": "^5.2.11",
+    "bemed": "git+https://github.com/Ximik/bemed.git"
   }
 }
