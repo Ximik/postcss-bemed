@@ -1,46 +1,73 @@
+"use strict"
+
 const postcss = require('postcss');
 
 const pluginName = 'postcss-bemed';
 module.exports = postcss.plugin(pluginName, (opts) => {
-  const getParams = (path, num) => {
+  const getParam = (path) => {
     if (!path.params) {
-      throw path.error('Missing param(s)', { plugin: pluginName });
+      throw path.error('Missing param', { plugin: pluginName });
     }
-    params = postcss.list.space(path.params);
-    if (params.length !== num) {
-      throw path.error('Must have ' + num + ' param(s) max', { plugin: pluginName });
+    const params = postcss.list.space(path.params);
+    if (params.length !== 1) {
+      throw path.error('Must have only one param', { plugin: pluginName });
     }
-    return params;
+    return params[0];
   };
 
-  const process = (path, opts) => {
-    console.log(opts);
-  };
-
-  return function (root) {
-    root.walkAtRules('block', (bpath) => {
-      const block = getParams(bpath, 1)[0];
-      bpath.walkAtRules('element', (epath) => {
-        const element = getParams(epath, 1)[0];
-        postcss.rule({
-          selector: '.' + block + '__' + element,
-          nodes: epath.nodes
-        }).moveAfter(bpath);
-        epath.remove();
+  const processIfModifier = (root, path, be) => {
+    if (path.type === 'atrule' && path.name === 'modifier') {
+      const m = getParam(path);
+      const modifier = postcss.rule({
+        selector: '.' + be + '--' + m,
+        source: path.source
       });
-      bpath.replaceWith(postcss.rule({
-        selector: '.' + block,
-        nodes: bpath.nodes
-      }));
-    });
-    root.walkAtRules('element', (path) => {
-      const params = getParams(path, 2);
-      path.replaceWith(postcss.rule({
-        selector: '.' + params[0] + '__' + params[1],
-        nodes: path.nodes
-      }));
-    });
-    root.walkAtRules('modifier', (mpath) => {
+      path.each((path) => {
+        if (path.type === 'atrule' && path.name === 'value') {
+          const v = getParam(path);
+          const value = postcss.rule({
+            selector: '.' + be + '--' + m + '-' + v,
+            source: path.source
+          });
+          path.each((path) => path.moveTo(value));
+          value.moveTo(root);
+          return;
+        }
+        path.moveTo(modifier);
+      });
+      modifier.moveTo(root);
+      return true;
+    }
+    return false;
+  }
+
+  return (root) => {
+    root.walkAtRules('block', (path) => {
+      const b = getParam(path);
+      const root = path.parent;
+      const block = postcss.rule({
+        selector: '.' + b,
+        source: path.source
+      });
+      path.each((path) => {
+        if (processIfModifier(root, path, b)) return;
+        if (path.type === 'atrule' && path.name === 'element') {
+          const e = getParam(path);
+          const be = b + '__' + e;
+          const element = postcss.rule({
+            selector: '.' + be,
+            source: path.source
+          });
+          path.each((path) => {
+            if (processIfModifier(root, path, be)) return;
+            path.moveTo(element);
+          });
+          element.moveTo(root);
+          return;
+        }
+        path.moveTo(block);
+      });
+      path.replaceWith(block);
     });
   };
 });
