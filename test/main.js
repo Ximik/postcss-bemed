@@ -19,14 +19,14 @@ assert('base structure', `
 .block {
     param: block
 }
-.block__element--mod-val {
-    param: val
+.block__element {
+    param: element
 }
 .block__element--mod {
     param: mod
 }
-.block__element {
-    param: element
+.block__element--mod-val {
+    param: val
 }
 `);
 
@@ -63,27 +63,27 @@ assert('real life example', `
 .Message {
     padding: 20px
 }
+.Message--size {
+    box-sizing: border-box
+}
 .Message--size-big {
     width: 500px
 }
 .Message--size-small {
     width: 200px
 }
-.Message--size {
-    box-sizing: border-box
-}
 .Message__title {
     font-size: 20px
 }
+.Message__message {
+    font-size: 16px;
+    color: black
+}
+.Message__message--state {}
 .Message__message--state-error {
     color: red
 }
 .Message__message--state-success {
     color: green
-}
-.Message__message--state {}
-.Message__message {
-    font-size: 16px;
-    color: black
 }
 `);

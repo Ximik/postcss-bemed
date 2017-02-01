@@ -36,6 +36,7 @@ module.exports = postcss.plugin(pluginName, (opts) => {
     if (path.type === 'atrule' && path.name === rules.modifier) {
       const m = getParam(path);
       const modifier = clone(path, helpers.bem(be, m));
+      modifier.moveTo(root);
       path.each((path) => {
         if (path.type === 'atrule' && path.name === rules.value) {
           const v = getParam(path);
@@ -46,7 +47,6 @@ module.exports = postcss.plugin(pluginName, (opts) => {
         }
         path.moveTo(modifier);
       });
-      modifier.moveTo(root);
       return true;
     }
     return false;
@@ -63,11 +63,11 @@ module.exports = postcss.plugin(pluginName, (opts) => {
           const e = getParam(path);
           const be = helpers.be(b, e);
           const element = clone(path, be);
+          element.moveTo(root);
           path.each((path) => {
             if (processIfModifier(root, path, be)) return;
             path.moveTo(element);
           });
-          element.moveTo(root);
           return;
         }
         path.moveTo(block);

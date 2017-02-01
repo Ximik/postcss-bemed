@@ -14,11 +14,11 @@ test('rules option', `
 }
 `, `
 .block {}
+.block__element {}
+.block__element--mod {}
 .block__element--mod-val {
     param: val
 }
-.block__element--mod {}
-.block__element {}
 `, {
   rules: {
     element: 'elem',
@@ -39,11 +39,11 @@ test('separators option', `
 }
 `, `
 .block {}
+.block---element {}
+.block---element--mod {}
 .block---element--mod-val {
     param: val
 }
-.block---element--mod {}
-.block---element {}
 `, {
   separators: {
     element: '---'
